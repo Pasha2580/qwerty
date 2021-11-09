@@ -8,7 +8,7 @@ using namespace std;
 int main() {
 //  считываем первую строку и преобразоуем ее в вектор
     string s;
-    ifstream at ("F:\\Studies\\C++\\in.txt");
+    ifstream at ("in.txt");
     at.is_open();
     getline (at, s);
     int x_1 = stoi(s);
@@ -25,7 +25,7 @@ int main() {
     int l_2 = 0;
 //  Считывание файла и преобразование каждой компоненты в чсило
     string str;
-    ifstream in ("F:\\Studies\\C++\\in.txt");
+    ifstream in ("in.txt");
     if(in.is_open()){
         while (getline (in,str)){
 //          координата х точки файла
