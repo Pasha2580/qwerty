@@ -34,17 +34,17 @@ int main() {
 //          координата y точки из файла
             int a_2;
             a_2 = stoi(str);
-            double ugol = (x_1 * a_1 + x_2 * a_2) / (sqrt(x_1 * x_1 + x_2*x_2) * sqrt(a_1 * a_1 + a_2 * a_2));
+            double ugl = (x_1 * a_1 + x_2 * a_2) / (sqrt(x_1 * x_1 + x_2*x_2) * sqrt(a_1 * a_1 + a_2 * a_2));
             if ((x_2 != 0 && a_1 >= x_1 * a_2 / x_2) || (x_2 == 0 && x_1 >= 0 && a_2 <= 0) || (x_2 == 0 && x_1 < 0 && a_2 >= 0)) {
-                if (ugol <= arg_r) {
-                    arg_r = ugol;
+                if (ugl <= arg_r) {
+                    arg_r = ugl;
                     r_1 = a_1;
                     r_2 = a_2;
                 }
             }
             else {
-                if (ugol <= arg_l) {
-                    arg_l = ugol;
+                if (ugl <= arg_l) {
+                    arg_l = ugl;
                     l_1 = a_1;
                     l_2 = a_2;
                 }
