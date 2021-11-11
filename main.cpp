@@ -16,7 +16,7 @@ int main() {
 
 //  Считывание файла и преобразование каждой компоненты в чсило
     string str;
-    ifstream in ("F:\\homework1\\in.txt");
+    ifstream in ("in.txt");
     in.is_open();
     getline(in, str);
     int x_1 = stoi(str);
