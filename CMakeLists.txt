@@ -3,5 +3,6 @@ project(homework2)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(homework1 main.cpp)
-add_executable(homework2 main.cpp)
+add_subdirectory(homework1 main.cpp)
+
+add_subdirectory(homework2 main.cpp)
