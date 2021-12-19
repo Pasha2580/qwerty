@@ -1,79 +1,149 @@
 #include <iostream>
 #include <cmath>
+#include <string>
 #include <fstream>
 
 
-int main(int argc, char** argv) {
+using namespace std;
 
-    double y_0 = 0, v_x = 0, v_y = 0, g = 9.81, answer = 0;
-    double check, tmp, t_collision;
-    int direction = 1;
-    int n = 0;
-    std::ifstream in_prev(argv[1]);
-    if (in_prev.is_open()){
-        in_prev >> y_0;
-        in_prev >> v_x;
-        in_prev >> v_y;
-        double t_end = (v_y+sqrt(v_y*v_y+2*g*y_0))/g;
-        while ((!in_prev.eof()) && (check <= v_x*t_end)) {
-            if (in_prev >> check >> tmp) {
-                n++;
-            }
-        }
+int main(int argc, char** argv)
+{
+    if (argc == 2){
+        cout << "1st argument: "<< argv[1] << endl;
+    } else {
+        // аргументов нет или их больше чем мы ожидаем
     }
-    in_prev.close();
-    auto*X = new double[n];
-    auto*Y = new double[n];
 
-    std::ifstream in(argv[1]);
-    if (in.is_open()){
-        in >> y_0;
-        in >> v_x;
-        in >> v_y;
-        int i = 0;
-        double t_end = (v_y+sqrt(v_y*v_y+2*g*y_0))/g;
-        while ((!in.eof()) && (X[i - 1] <= v_x*t_end) && (i <= n - 1)) {
-            in >> X[i];
-            in >> Y[i];
-            i++;
+    ifstream file(argv[1]);
+    int j=0;
+    auto STR = new double[50];
+
+    if (file.is_open()){
+        //cout << "File is open" << endl;
+        while(!file.eof()){
+            double w;
+            file >> w;
+            STR[j] = w;
+            j = j + 1;
         }
+    } else {
+        //cout << "File is not open" << endl;
     }
-    in.close();
 
-    double A_x = v_x, A_y = v_y, B_x = 0, B_y = y_0;
-    double t_end = (v_y+sqrt(v_y*v_y+2*g*y_0))/g;
+    double h0 = STR[0], v_x = STR[1], v_y = STR[2];
+    double massiveX[(j-2)/2];
+    for (int m = 2; m<=(j/2); m++){
 
-    for (int i = 0; (i >= 0) && (i <= n - 1); i = i + direction){
-        t_collision = (X[i] - B_x)/A_x;
-        if (t_collision <= t_end) {
-            if ((-g * t_collision * t_collision/2 + A_y * t_collision + B_y) <= Y[i]) {
-                B_x = 2*A_x*t_collision + B_x;
-                A_x = -A_x;
-                direction = (-1)*direction;
-            }
-        }else{
+        massiveX[m-1]=STR[2*m-1];
+    }
+    double massiveH[(j-2)/2];
+    for (int u = 2; u<=(j/2); u++){
+
+        massiveH[u-1]=STR[2*u];
+    }
+    massiveX[0]=0;
+    massiveH[0]=h0;
+
+    double g=9.81,x1,x2,t,t1,t2;
+    int i = 1;
+
+    bool check = false;
+    auto Y = new double[10];
+    Y[0] = h0;
+    int k = 0;
+
+    while (check == false)
+    {
+
+        t=abs((massiveX[i]-massiveX[i-1])/v_x);
+
+        if (v_x>0){
+            Y[i]=Y[i-1]+v_y*t-g*t*t/2;
+        } else {
+            Y[i]=Y[i+1]+v_y*t-g*t*t/2;
+        }
+
+        if (Y[i]<=0){
+            cout << i-1 << endl;
             break;
         }
-    }
 
-    double coordinate_final = A_x*t_end + B_x;
+        if (Y[i]>massiveH[i]){
 
-    for (int i = 0; i <= n - 2; i++){
-        if ((coordinate_final >= X[i]) && (coordinate_final <= X[i + 1])){
-            answer = i + 1;
-            break;
+            if (v_x>0){
+                i++;
+            } else {
+                i--;
+            }
+            v_y = v_y - g*t;
+
+        } else {
+
+            k=k+1;
+            v_y=v_y-g*t;
+
+            if (k % 2 != 0){
+                v_x = -v_x;
+            } else {
+                v_x = v_x;
+            }
+
+            t1=v_y/g+0.5*sqrt(4*v_y*v_y/(g*g)+8*Y[i]/g);
+            t2=v_y/g-0.5*sqrt(4*v_y*v_y/(g*g)+8*Y[i]/g);
+
+            x1 = massiveX[i]+v_x*t1;
+            x2 = massiveX[i]+v_x*t2;
+
+            if (v_x>0){
+                if (x1>x2){
+                    if (x1<=massiveX[i+1]){
+                        cout << i << endl;
+                        check = true;
+                    } else {
+                        i++;
+                    }
+                } else {
+                    if (x2<=massiveX[i+1]){
+                        cout << i << endl;
+                        check = true;
+                    } else {
+                        i++;
+                    }
+                }
+            } else {
+                if (x1>x2){
+                    if (x2>=massiveX[i-1]){
+                        cout << i-1 << endl;
+                        check = true;
+                    } else {
+                        i--;
+                    }
+                } else {
+                    if (x1>=massiveX[i-1]){
+                        cout << i-1 << endl;
+                        check = true;
+                    } else {
+                        i--;
+                    }
+                }
+            }
+            k=0;
         }
+
+        if (i<1) {
+            cout << 0;
+            check = true;
+        } else if (i>j/2){
+            cout << i;
+            check = true;
+        } else {
+
+        }
+
     }
 
-    if (coordinate_final > X[n - 1]){
-        answer = n;
-    }
+    delete [] Y;
+    delete [] STR;
 
-    if (coordinate_final < X[0]){
-        answer = 0;
-    }
-
-    delete[] X;
-    delete[] Y;
-    std::cout << answer << std::endl;
+    return 0;
 }
