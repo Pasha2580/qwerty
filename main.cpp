@@ -1,57 +1,82 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <cmath>
 
 using namespace std;
 
 int main() {
 
-    double arg_r = 1;
-    double arg_l = 1;
-    int r_1 = 0;
-    int r_2 = 0;
-    int l_1 = 0;
-    int l_2 = 0;
+    float g = 9.81;
 
-//  Считывание файла и преобразование каждой компоненты в чсило
+    // Считываем начальную высоту и скорость мат. точки
     string str;
-    ifstream in ("in.txt");
+    ifstream in ("test2(1).txt");
     in.is_open();
-    getline(in, str);
-    int x_1 = (int)stoi(str);
-    string z = to_string(x_1);
-    str.erase(str.find(z), z.length());
-    int x_2 = (int)stoi(str);
+    in >> str;
+    float h_0 = stof(str);
+    in >> str;
+    float v_x = stof(str);
+    in >> str;
+    float v_y = stof(str);
 
-    if(in.is_open()){
-        while (getline (in,str)){
-//          координата х точки файла
-            int a_1 = (int)stoi(str);
-            string b = to_string(a_1);
-            str.erase(str.find(b), b.length());
-//          координата y точки из файла
-            int a_2 = (int)stoi(str);
-            double ugl = (x_1 * a_1 + x_2 * a_2) / (sqrt(x_1 * x_1 + x_2*x_2) * sqrt(a_1 * a_1 + a_2 * a_2));
-            if ((x_2 != 0 && a_1 >= x_1 * a_2 / x_2) || (x_2 == 0 && x_1 >= 0 && a_2 <= 0) || (x_2 == 0 && x_1 < 0 && a_2 >= 0)) {
-                if (ugl <= arg_r) {
-                    arg_r = ugl;
-                    r_1 = a_1;
-                    r_2 = a_2;
-                }
-            }
-            else {
-                if (ugl <= arg_l) {
-                    arg_l = ugl;
-                    l_1 = a_1;
-                    l_2 = a_2;
-                }
-            }
+    int n = 0;
+    float arr[100][100];
+
+    // Считываем координаты и высоты перегородок
+    if (in.is_open()){
+        while (in >> str){
+            float x_n = stof(str);
+            arr[n][0] = x_n;
+            in >> str;
+            float h_n = stof(str);
+            arr[n][1] = h_n;
+            n++;
         }
     }
     in.close();
-    cout << "Leftmost: " << l_1 << " " << l_2 << endl;
-    cout << "Rightmost: " << r_1 << " " << r_2 << endl;
 
-    return 0;
+
+    float x = arr[0][0];
+    float p = arr[0][1];
+    float h = x * v_y / v_x - x * x * g / (2 * v_x * v_x) + h_0;
+    int i = 0;
+
+    if (v_x > 0){
+        while (h > 0){
+            if ((x * v_y / v_x - x * x * g / (2 * v_x * v_x) + h_0) <= p){
+                v_x = - v_x;
+
+                if (v_x > 0){
+                    x = arr[i+1][0];
+                    p = arr[i+1][1];
+                    i = i + 1;
+                    h = x * v_y / v_x - x * g / (2 * v_x * v_x) + h_0;
+                }else{
+                    if (i - 1 >= 0){
+                        x = arr[i-1][0];
+                        p = arr[i-1][1];
+                        i = i - 1;
+                        h = x * v_y / v_x - x * g / (2 * v_x * v_x) + h_0;
+                    }else{
+                        i = 0;
+                        h = -1;
+                    }
+                }
+
+            } else {
+                if (i + 1 <= n) {
+                    x = arr[i + 1][0];
+                    p = arr[i + 1][1];
+                    h = x * v_y / v_x - x * g / (2 * v_x * v_x) + h_0;
+                    i = i + 1;
+                } else{
+                    i = n;
+                    h = -1;
+                }
+            }
+        }
+        cout << i << endl;
+    } else{
+        cout << 0 << endl;
+    }
 }
