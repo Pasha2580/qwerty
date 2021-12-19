@@ -1,84 +1,79 @@
 #include <iostream>
+#include <cmath>
 #include <fstream>
-#include <string>
 
-using namespace std;
 
-int main() {
+int main(int argc, char** argv) {
 
-    float g = 9.81;
-
-    // Считываем начальную высоту и скорость мат. точки
-    string str;
-    ifstream in ("test2(1).txt");
-    in.is_open();
-    in >> str;
-    float h_0 = stof(str);
-    in >> str;
-    float v_x = stof(str);
-    in >> str;
-    float v_y = stof(str);
-
+    double y_0 = 0, v_x = 0, v_y = 0, g = 9.81, answer = 0;
+    double check, tmp, t_collision;
+    int direction = 1;
     int n = 0;
-    float arr[100][100];
+    std::ifstream in_prev(argv[1]);
+    if (in_prev.is_open()){
+        in_prev >> y_0;
+        in_prev >> v_x;
+        in_prev >> v_y;
+        double t_end = (v_y+sqrt(v_y*v_y+2*g*y_0))/g;
+        while ((!in_prev.eof()) && (check <= v_x*t_end)) {
+            if (in_prev >> check >> tmp) {
+                n++;
+            }
+        }
+    }
+    in_prev.close();
+    auto*X = new double[n];
+    auto*Y = new double[n];
 
-    // Считываем координаты и высоты перегородок
+    std::ifstream in(argv[1]);
     if (in.is_open()){
-        while (in >> str){
-            float x_n = stof(str);
-            arr[n][0] = x_n;
-            in >> str;
-            float h_n = stof(str);
-            arr[n][1] = h_n;
-            n++;
+        in >> y_0;
+        in >> v_x;
+        in >> v_y;
+        int i = 0;
+        double t_end = (v_y+sqrt(v_y*v_y+2*g*y_0))/g;
+        while ((!in.eof()) && (X[i - 1] <= v_x*t_end) && (i <= n - 1)) {
+            in >> X[i];
+            in >> Y[i];
+            i++;
         }
     }
     in.close();
 
+    double A_x = v_x, A_y = v_y, B_x = 0, B_y = y_0;
+    double t_end = (v_y+sqrt(v_y*v_y+2*g*y_0))/g;
 
-    float x = arr[0][0];
-    float p = arr[0][1];
-    float h = x * v_y / v_x - x * x * g / (2 * v_x * v_x) + h_0;
-    int i = 0;
-
-    if (v_x > 0){
-        while (h > 0){
-            if ((x * v_y / v_x - x * x * g / (2 * v_x * v_x) + h_0) <= p){
-                v_x = - v_x;
-
-                if (v_x > 0){
-                    x = arr[i+1][0];
-                    p = arr[i+1][1];
-                    i = i + 1;
-                    h = x * v_y / v_x - x * g / (2 * v_x * v_x) + h_0;
-                }else{
-                    if (i - 1 >= 0){
-                        x = arr[i-1][0];
-                        p = arr[i-1][1];
-                        i = i - 1;
-                        h = x * v_y / v_x - x * g / (2 * v_x * v_x) + h_0;
-                    }else{
-                        i = 0;
-                        h = -1;
-                    }
-                }
-
-            } else {
-                if (i + 1 <= n) {
-                    x = arr[i + 1][0];
-                    p = arr[i + 1][1];
-                    h = x * v_y / v_x - x * g / (2 * v_x * v_x) + h_0;
-                    i = i + 1;
-                } else{
-                    i = n;
-                    h = -1;
-                }
+    for (int i = 0; (i >= 0) && (i <= n - 1); i = i + direction){
+        t_collision = (X[i] - B_x)/A_x;
+        if (t_collision <= t_end) {
+            if ((-g * t_collision * t_collision/2 + A_y * t_collision + B_y) <= Y[i]) {
+                B_x = 2*A_x*t_collision + B_x;
+                A_x = -A_x;
+                direction = (-1)*direction;
             }
+        }else{
+            break;
         }
-        cout << i << endl;
-    } else{
-        cout << 0 << endl;
     }
 
-    return 0;
+    double coordinate_final = A_x*t_end + B_x;
+
+    for (int i = 0; i <= n - 2; i++){
+        if ((coordinate_final >= X[i]) && (coordinate_final <= X[i + 1])){
+            answer = i + 1;
+            break;
+        }
+    }
+
+    if (coordinate_final > X[n - 1]){
+        answer = n;
+    }
+
+    if (coordinate_final < X[0]){
+        answer = 0;
+    }
+
+    delete[] X;
+    delete[] Y;
+    std::cout << answer << std::endl;
 }
