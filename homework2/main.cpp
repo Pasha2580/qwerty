@@ -1,149 +1,89 @@
 #include <iostream>
+#include <vector>
 #include <cmath>
 #include <string>
 #include <fstream>
-
-
 using namespace std;
 
-int main(int argc, char** argv)
-{
-    if (argc == 2){
-        cout << "1st argument: "<< argv[1] << endl;
-    } else {
-        // аргументов нет или их больше чем мы ожидаем
+void print_arr(vector <double>& arr) {
+    for (int i = 0; i < arr.size(); i++) {
+        cout << arr[i] << endl;
     }
+}
 
-    ifstream file(argv[1]);
-    int j=0;
-    auto STR = new double[50];
+//ô-ÿ ÷òåíèÿ ôàéëà
 
-    if (file.is_open()){
-        //cout << "File is open" << endl;
-        while(!file.eof()){
-            double w;
-            file >> w;
-            STR[j] = w;
-            j = j + 1;
+
+vector<double> divider(vector<double>& arr, string type) {
+    int n = arr.size();
+    vector<double> X_obs;
+    vector<double> Y_obs;
+    for (int i = 0; i < n; i++) {
+        if (i % 2 == 0) {
+            X_obs.push_back(arr[i]);
         }
-    } else {
-        //cout << "File is not open" << endl;
-    }
-
-    double h0 = STR[0], v_x = STR[1], v_y = STR[2];
-    double massiveX[(j-2)/2];
-    for (int m = 2; m<=(j/2); m++){
-
-        massiveX[m-1]=STR[2*m-1];
-    }
-    double massiveH[(j-2)/2];
-    for (int u = 2; u<=(j/2); u++){
-
-        massiveH[u-1]=STR[2*u];
-    }
-    massiveX[0]=0;
-    massiveH[0]=h0;
-
-    double g=9.81,x1,x2,t,t1,t2;
-    int i = 1;
-
-    bool check = false;
-    auto Y = new double[10];
-    Y[0] = h0;
-    int k = 0;
-
-    while (check == false)
-    {
-
-        t=abs((massiveX[i]-massiveX[i-1])/v_x);
-
-        if (v_x>0){
-            Y[i]=Y[i-1]+v_y*t-g*t*t/2;
-        } else {
-            Y[i]=Y[i+1]+v_y*t-g*t*t/2;
+        else {
+            Y_obs.push_back(arr[i]);
         }
+    }
+    return (type == "X") ? X_obs : Y_obs;
+}
 
-        if (Y[i]<=0){
-            cout << i-1 << endl;
-            break;
-        }
+double dvizh(double h, double alpha, double x, double g, double v0) {
+    double y;
+    y = h + tan(alpha) * x - pow(x, 2) * g / (2 * pow(v0 * cos(alpha), 2));
+    return y;
+}
 
-        if (Y[i]>massiveH[i]){
-
-            if (v_x>0){
-                i++;
-            } else {
-                i--;
+int main(int argc, char** argv) {
+    if (argc == 2) {
+        vector <double> points;
+        ifstream file(argv[1]);
+        if (file.is_open()) {
+            string str;
+            while (!file.eof()) {
+                file >> str;
+                points.push_back(stod(str));
             }
-            v_y = v_y - g*t;
-
-        } else {
-
-            k=k+1;
-            v_y=v_y-g*t;
-
-            if (k % 2 != 0){
-                v_x = -v_x;
-            } else {
-                v_x = v_x;
-            }
-
-            t1=v_y/g+0.5*sqrt(4*v_y*v_y/(g*g)+8*Y[i]/g);
-            t2=v_y/g-0.5*sqrt(4*v_y*v_y/(g*g)+8*Y[i]/g);
-
-            x1 = massiveX[i]+v_x*t1;
-            x2 = massiveX[i]+v_x*t2;
-
-            if (v_x>0){
-                if (x1>x2){
-                    if (x1<=massiveX[i+1]){
-                        cout << i << endl;
-                        check = true;
-                    } else {
-                        i++;
-                    }
-                } else {
-                    if (x2<=massiveX[i+1]){
-                        cout << i << endl;
-                        check = true;
-                    } else {
-                        i++;
-                    }
-                }
-            } else {
-                if (x1>x2){
-                    if (x2>=massiveX[i-1]){
-                        cout << i-1 << endl;
-                        check = true;
-                    } else {
-                        i--;
-                    }
-                } else {
-                    if (x1>=massiveX[i-1]){
-                        cout << i-1 << endl;
-                        check = true;
-                    } else {
-                        i--;
-                    }
-                }
-            }
-            k=0;
         }
-
-        if (i<1) {
-            cout << 0;
-            check = true;
-        } else if (i>j/2){
-            cout << i;
-            check = true;
-        } else {
-
+        else {
+            cout << "Error";
         }
+        file.close();
 
+        double h = (points[0]);
+        points.erase(points.begin());
+        double vx = points[0];
+        double vy = points[1];
+        points.erase(points.begin());
+        points.erase(points.begin());
+        vector <double> X_obs = divider(points, "X");
+        vector <double> Y_obs = divider(points, "Y");
+        double g = 10;
+        double tanAlpha = vy / vx;
+        double alpha = atan(tanAlpha);
+        double v0 = vx / cos(alpha);
+        bool pp = false;
+        int i = 0;
+
+        for (int i = 0; i < X_obs.size(); i++) {
+            if (dvizh(h, alpha, X_obs[i], g, v0) <= Y_obs[i]) {
+                cout << i << endl;
+                pp = false;
+                break;
+            }
+            else {
+                pp = true;
+            }
+        }
+        if (pp == true) {
+            cout << X_obs.size();
+        }
     }
-
-    delete [] Y;
-    delete [] STR;
+    else {
+        cout << "Wrong arguments";
+    }
+    
 
     return 0;
 }
