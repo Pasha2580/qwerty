@@ -1,89 +1,81 @@
 #include <iostream>
-#include <vector>
 #include <cmath>
-#include <string>
 #include <fstream>
+#include <vector>
 using namespace std;
 
-void print_arr(vector <double>& arr) {
-    for (int i = 0; i < arr.size(); i++) {
-        cout << arr[i] << endl;
+
+int main(int argc, char** argv)
+{
+    double y0=0, x0 = 0, vx = 0, vy = 0, g = 9.8, x, y;
+    int site = 0;
+
+    vector<double> X;
+    vector<double> Y;
+
+    ifstream fin(argv[1]);
+
+    if (fin.is_open()) {
+        fin >> y0 >> vx >> vy;
+        //double t = (vy + sqrt(vy * vy + 2 * y0 * g)) / g;
+
+            while (fin >> x >> y)
+            {
+                X.push_back(x);
+                Y.push_back(y);
+            }
+
+
     }
-}
+    fin.close();
 
-//ô-ÿ ÷òåíèÿ ôàéëà
+    int direction = 1;
+    double t = (vy + sqrt(vy*vy+2*y0*g))/g;
+    double t_col;
 
 
-vector<double> divider(vector<double>& arr, string type) {
-    int n = arr.size();
-    vector<double> X_obs;
-    vector<double> Y_obs;
-    for (int i = 0; i < n; i++) {
-        if (i % 2 == 0) {
-            X_obs.push_back(arr[i]);
-        }
-        else {
-            Y_obs.push_back(arr[i]);
-        }
-    }
-    return (type == "X") ? X_obs : Y_obs;
-}
-
-double dvizh(double h, double alpha, double x, double g, double v0) {
-    double y;
-    y = h + tan(alpha) * x - pow(x, 2) * g / (2 * pow(v0 * cos(alpha), 2));
-    return y;
-}
-
-int main(int argc, char** argv) {
-    if (argc == 2) {
-        vector <double> points;
-        ifstream file(argv[1]);
-        if (file.is_open()) {
-            string str;
-            while (!file.eof()) {
-                file >> str;
-                points.push_back(stod(str));
-            }
-        }
-        else {
-            cout << "Error";
-        }
-        file.close();
-
-        double h = (points[0]);
-        points.erase(points.begin());
-        double vx = points[0];
-        double vy = points[1];
-        points.erase(points.begin());
-        points.erase(points.begin());
-        vector <double> X_obs = divider(points, "X");
-        vector <double> Y_obs = divider(points, "Y");
-        double g = 10;
-        double tanAlpha = vy / vx;
-        double alpha = atan(tanAlpha);
-        double v0 = vx / cos(alpha);
-        bool pp = false;
-        int i = 0;
-
-        for (int i = 0; i < X_obs.size(); i++) {
-            if (dvizh(h, alpha, X_obs[i], g, v0) <= Y_obs[i]) {
-                cout << i << endl;
-                pp = false;
-                break;
-            }
-            else {
-                pp = true;
-            }
-        }
-        if (pp == true) {
-            cout << X_obs.size();
-        }
+    if (X.size() == 0) {
+        site = 0;
     }
     else {
-        cout << "Wrong arguments";
-    }
-    
+        for (int i = 0; (i >= 0) && (i <= X.size() - 1); i = i + direction) {
+            // x = x0+vx*t
+            t_col = (X[i] - x0) / vx;
+            if (t_col <= t) {
+                if ((y0 + vy * t_col - g * t_col * t_col / 2 <= Y[i])) //y = y0 + vy*t -gt^2/2
+                {
+                    x0 = 2 * vx * t_col + x0;
+                    vx = -vx;
+                    direction = (-1) * direction;
+                }
+            } else {
+                break;
+            }
+        }
 
+        double XX = x0 + vx * t; // поиск конечной координаты
+
+
+        for (int i = 0; (i <= X.size() - 1); i++) {
+            if ((XX >= X[i]) && (XX <= X[i + 1])) {
+                site = i + 1;
+                break;
+            }
+        }
+
+        if ((XX > X[X.size() - 1])) {
+            site = X.size();
+        }
+
+        if (XX < X[0]) {
+            site = 0;
+        }
+    }
+
+    X.clear();
+    Y.clear();
+    X.shrink_to_fit();
+    Y.shrink_to_fit();
+    cout << site << endl;
     return 0;
 }
