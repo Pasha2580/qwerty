@@ -74,8 +74,6 @@ int main(int argc, char** argv)
 
     X.clear();
     Y.clear();
-    X.shrink_to_fit();
-    Y.shrink_to_fit();
     cout << site << endl;
     return 0;
 }
