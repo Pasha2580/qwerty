@@ -17,7 +17,6 @@ int main(int argc, char** argv)
 
     if (fin.is_open()) {
         fin >> y0 >> vx >> vy;
-        //double t = (vy + sqrt(vy * vy + 2 * y0 * g)) / g;
 
             while (fin >> x >> y)
             {
@@ -42,7 +41,7 @@ int main(int argc, char** argv)
             // x = x0+vx*t
             t_col = (X[i] - x0) / vx;
             if (t_col <= t) {
-                if ((y0 + vy * t_col - g * t_col * t_col / 2 <= Y[i])) //y = y0 + vy*t -gt^2/2
+                if ((y0 + vy * t_col - g * t_col * t_col / 2 <= Y[i])) 
                 {
                     x0 = 2 * vx * t_col + x0;
                     vx = -vx;
@@ -53,7 +52,7 @@ int main(int argc, char** argv)
             }
         }
 
-        double XX = x0 + vx * t; // поиск конечной координаты
+        double XX = x0 + vx * t; 
 
 
         for (int i = 0; (i <= X.size() - 1); i++) {
