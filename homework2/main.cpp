@@ -70,9 +70,6 @@ int main(int argc, char** argv)
             site = 0;
         }
     }
-
-    X.clear();
-    Y.clear();
     cout << site << endl;
     return 0;
 }
